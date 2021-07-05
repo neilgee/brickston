@@ -132,7 +132,7 @@ function wsl_edit_text() {
 }
 
 
-add_action( 'wp_print_styles', 'bt_deregister_gbstyles', 100 );
+//add_action( 'wp_print_styles', 'bt_deregister_gbstyles', 100 );
 //Disable gutenberg style in Frontend
 function bt_deregister_gbstyles() {
 	wp_dequeue_style( 'wp-block-library' ); // WordPress Core

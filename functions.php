@@ -17,6 +17,7 @@ add_action( 'wp_enqueue_scripts', function() {
 	wp_enqueue_style( 'bricks-child', get_stylesheet_uri(), ['bricks-frontend'], filemtime( get_stylesheet_directory() . '/style.css' ) );
 } );
 
+
 /**
  * Register custom elements
  */
@@ -131,27 +132,13 @@ add_filter( 'bricks/builder/save_messages', function( $messages ) {
 		'Done',
 		'Cool',
 		'High five!',
+		'WTF',
+		'Jawohl'
 	];
 
   return $messages;
 } );
 
-/**
- * Customize standard fonts
- */
-// add_filter( 'bricks/builder/standard_fonts', function( $standard_fonts ) {
-// 	// First option: Add individual standard font
-// 	$standard_fonts[] = 'Verdana';
-
-// 	// Second option: Replace all standard fonts
-// 	$standard_fonts = [
-// 		'Georgia',
-// 		'Times New Roman',
-// 		'Verdana',
-// 	];
-
-//   return $standard_fonts;
-// } );
 
 /** 
  * Add custom map style
@@ -179,18 +166,30 @@ remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 /**
+ * WOO Customizer Options
+ * Load in WooCommerce customizer options and functions
+ * @since 1.0.0
+ */
+if ( class_exists( 'WooCommerce' ) ) {
+	include_once( get_stylesheet_directory() . '/includes/woocommerce/customizer-woo.php' );
+	include_once( get_stylesheet_directory() . '/includes/woocommerce/woocommerce.php' );
+}
+
+/**
+ * Add Customizer Options and CSS output.
+ * @since 1.0.0
+ */
+require_once( get_stylesheet_directory() . '/includes/customizer-panels.php' );
+require_once( get_stylesheet_directory() . '/includes/inline-css-style.php' );
+require_once( get_stylesheet_directory() . '/includes/inline-css-style-login.php' );
+
+
+
+/**
  * Client Logo for WP Login and backend dashboard admin clean up.
  * @since 1.0.0
  */
 include_once( get_stylesheet_directory() . '/includes/dashboard.php' );
-
-/**
- * Load in WooCommerce functions
- * @since 1.0.0
- */
-if ( class_exists( 'WooCommerce' ) ) {
-	include_once( get_stylesheet_directory() . '/includes/woocommerce/woocommerce.php' );
-}
 
 /**
  * Load in Gravity Forms functions
@@ -209,6 +208,8 @@ if ( class_exists( 'acf' ) ) {
 }
 	
 
+// Me shortcodes
+include_once( get_stylesheet_directory() . '/includes/shortcodes.php' );
 /**
  * Custom Image Sizes
  * Image sizes - add in required image sizes here. Not working for theme if inside after_setup_theme function
@@ -230,6 +231,41 @@ function bt_remove_default_images( $sizes ) {
 	// unset( $sizes['large']); // 1024px
 	unset( $sizes['medium_large']); // 768px
 	return $sizes;
+}
+
+
+add_filter( 'upload_mimes', 'bt_add_svg_images' );
+/**
+ * Allow SVG Images Via Media Uploader.
+ * @since 1.0.0
+ */
+function bt_add_svg_images( $mimetypes ) {
+	$mimetypes['svg'] = 'image/svg+xml';
+	return $mimetypes;
+}
+
+/**
+ * Add support for custom logo change the dimensions to suit. Need WordPress 4.5 for this.
+ * @since 1.0.0
+ */
+add_theme_support( 'custom-logo', array(
+	'height'      => 100, // set to your dimensions
+	'width'       => 300,// set to your dimensions
+	'flex-height' => true,
+	'flex-width'  => true,
+));
+
+add_shortcode( 'client_logo', 'bt_client_logo' );
+/**
+ * Position the content with a shortcode [client_logo]
+ * @since 1.0.0
+ */
+function bt_client_logo() {
+ob_start();
+	if ( function_exists( 'the_custom_logo' ) ) {    
+		echo '<div itemscope itemtype="http://schema.org/Organization">' . get_custom_logo() . '</div>';
+	}
+return ob_get_clean();
 }
 
 
@@ -267,3 +303,49 @@ function bt_image_meta_upon_image_upload( $post_ID ) {
 		wp_update_post( $my_image_meta );
 	} 
 }
+
+add_action('wp_enqueue_scripts','wpb_post_scripts' );
+function wpb_post_scripts() {
+	
+   if ( is_front_page() && ! is_user_logged_in() ) {
+		wp_deregister_style( 'dashicons' );
+	}
+}
+
+add_action('manage_posts_custom_column', 'column_content', 5, 2);
+/**
+* See Post ID in Dashboard
+*/
+function add_column( $columns ){
+	$columns['post_id_clmn'] = 'ID'; // $columns['Column ID'] = 'Column Title';
+	return $columns;
+}
+add_filter('manage_posts_columns', 'add_column', 5);
+
+function column_content( $column, $id ){
+	if( $column === 'post_id_clmn')
+		echo $id;
+}
+
+
+add_filter( 'bricks/builder/standard_fonts', function( $standard_fonts ) {
+	// Option #1: Add individual standard font
+	// $standard_fonts[] = '-apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;';
+	
+	// Option #2: Replace all standard fonts
+	$standard_fonts = [
+		'Arial',
+		'Courier New',
+		'Helvetica',
+		'Helvetica Neue',
+		'Georgia',
+		'Times New Roman',
+		'Verdana',
+		'-apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif',
+		'Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol',
+		'Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace',
+	];
+	
+	return $standard_fonts;
+} );
+
