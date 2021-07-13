@@ -196,4 +196,3 @@ function column_content( $column, $id ){
 		echo $id;
 }
 
-
