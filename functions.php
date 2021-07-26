@@ -79,6 +79,7 @@ if ( class_exists( 'acf' ) ) {
 
 // Me shortcodes
 include_once( get_stylesheet_directory() . '/includes/shortcodes.php' );
+
 /**
  * Custom Image Sizes
  * Image sizes - add in required image sizes here. Not working for theme if inside after_setup_theme function
@@ -196,3 +197,10 @@ function column_content( $column, $id ){
 		echo $id;
 }
 
+
+
+if( function_exists('acf_add_options_page') ) {
+	
+	acf_add_options_page();
+	
+}
