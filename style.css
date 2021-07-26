@@ -140,3 +140,9 @@ p {
         margin: 40px auto;
     }
 }
+
+/* Sticky Footer */
+
+.bricks-site-wrapper {
+	min-height:100vh;
+} 
